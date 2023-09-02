@@ -33,6 +33,24 @@ jobs:
           start: npm run start-prod
           wait-on: 'http://localhost:5000'
           wait-on-timeout: 120
+
+      - name: Test Success
+
+        uses: rjstone/discord-webhook-notify@89b0bf43c2c8514f70d0dcba4a706b904e8a3112
+        if: success()
+        with:
+          severity: info
+          details: New commit ${{ github.event.commits[0].url }} by ${{ github.event.commits[0].committer.username }}
+          webhookUrl: ${{ secrets.DISCORD_WEBHOOK }}
+
+      - name: Test Failure
+        uses: rjstone/discord-webhook-notify@89b0bf43c2c8514f70d0dcba4a706b904e8a3112
+        if: failure()
+        with:
+          severity: error
+          details: Deployment failed! The commit ${{ github.event.commits[0].url }} by ${{ github.event.commits[0].committer.username }} broke something
+          webhookUrl: ${{ secrets.DISCORD_WEBHOOK }}
+      
           
   tag_release:
     if: ${{ github.event_name == 'push'  && !contains(join(toJson(github.event.commits.*.message)), '#skip')}}
